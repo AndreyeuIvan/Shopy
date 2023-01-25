@@ -7,6 +7,8 @@ from shopy import views
 router = routers.DefaultRouter()
 
 router.register(r'shopy', views.ReversedViewSet, basename='reserve')
+router.register(r'account', views.AccountReadOnlyViewSet)
+router.register(r'product', views.ProductReadOnlyViewSet)
 
 
 urlpatterns = [
