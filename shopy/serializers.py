@@ -12,25 +12,28 @@ class ReserverSerializer(serializers.ModelSerializer):
         fields = ('user', 'number_of_units', 'product')
 '''
 
-class ProductSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Product
-        fields = ('id', 'name', 'shop_name', 'unit', 'number_of_units', 'price_for_unit', 'price_for_kg')
-
-
-class ProductApplySerializer(ProductSerializer):
-    id = serializers.IntegerField()
-
-
 
 class ReserverSerializer(serializers.ModelSerializer):
-    product = ProductApplySerializer()
 
     class Meta:
         model = Reserved
         fields = ('user', 'number_of_units', 'product')
 
+
+class ProductSerializer(serializers.ModelSerializer):
+    reverse = ReserverSerializer(many=True)
+
+    def create(self, validated_data):
+
+        reverses_data = validated_data.pop('reverse')
+        product = Product.objects.create(**validated_data)
+        for reverse_data in reverses_data:
+            Reserved.objects.create(product=product, **reverse_data)
+        return product
+
+    class Meta:
+        model = Product
+        fields = ('id', 'name')
 
 
 class AccountSerializer(serializers.ModelSerializer):

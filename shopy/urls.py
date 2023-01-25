@@ -13,6 +13,6 @@ router.register(r'product', views.ProductReadOnlyViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('api-auth/', include('rest_framework.urls')),
+    #path('api-auth/', include('rest_framework.urls')),
     path('basket/', views.BasketView.as_view()),
 ]

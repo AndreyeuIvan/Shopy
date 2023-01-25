@@ -30,8 +30,8 @@ class Product(models.Model):
     shop_name = models.CharField(max_length=50)
     unit = models.CharField(max_length=50)
     number_of_units = models.IntegerField(
-        default=1,
-        validators=[MaxValueValidator(1000), MinValueValidator(1)]
+        default=0,
+        validators=[MaxValueValidator(1000), MinValueValidator(0)]
     )
     price_for_unit = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     price_for_kg = models.DecimalField(max_digits=6, decimal_places=2, default=0)
@@ -51,8 +51,8 @@ class Reserved(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     product = models.ForeignKey("Product", on_delete=models.CASCADE)
     number_of_units = models.IntegerField(
-        default=1,
-        validators=[MaxValueValidator(1000), MinValueValidator(1)]
+        default=0,
+        validators=[MaxValueValidator(1000), MinValueValidator(0)]
     )
 
     class Meta:
