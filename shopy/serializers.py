@@ -28,7 +28,6 @@ class ReserverSerializer(serializers.ModelSerializer):
         print(self.context, "validate")
         # import pdb;pdb.set_trace()
         return validated_data
-        raise serializers.ValidationError("ARRR")
 
     def validate_number_of_units(self, data):
         required_qty = self.initial_data["number_of_units"]
@@ -46,7 +45,9 @@ class ReserverSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    reverse = ReserverSerializer(many=True)
+    reserve = ReserverSerializer(many=True, required=False)
+    # import pdb;pdb.set_trace()
+    price_for_kilo = serializers.ReadOnlyField()
     """
     def validate(self, own_stock, required_qty):
         import pdb;pdb.set_trace()
@@ -55,15 +56,22 @@ class ProductSerializer(serializers.ModelSerializer):
     """
 
     def create(self, validated_data):
-        reverses_data = validated_data.pop("reverse")
+        reserved_data = validated_data.pop("reserve")
         product = Product.objects.create(**validated_data)
-        for reverse_data in reverses_data:
-            Reserved.objects.create(product=product, **reverse_data)
+        for reserve_data in reserved_data:
+            Reserved.objects.create(product=product, **reserve_data)
         return product
+
+    """
+    def get_validation_exclusions(self):
+        exclusions = super(ProductSerializer, self).get_validation_exclusions()
+        return exclusions + ['reserve']
+    """
 
     class Meta:
         model = Product
-        fields = ("id", "name", "reverse")
+        fields = ("id", "name", "reserve", "price_for_kilo")
+        optional_fields = ("reserve",)
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -76,8 +84,8 @@ class AccountSerializer(serializers.ModelSerializer):
     def validate(self, data):
         print(data)
         # import pdb;pdb.set_trace()
-        user_amount = Account.objects.get(user=self.context["user"]).amount
-        if user_amount < self.context["sum_reserved"]:
+        # user_amount = Account.objects.get(user=self.context["user"]).amount filter
+        if self.context["account_amount"] < self.context["sum_reserved"]:
             raise serializers.ValidationError("Fullfill your account")
         validated_data = super().validate(data)
         return validated_data

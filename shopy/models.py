@@ -35,9 +35,7 @@ class Shop(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=250)
-    shop_name = models.ForeignKey(
-        Shop, on_delete=models.CASCADE
-    )  # Foreigne key with Model Shop
+    shop_name = models.ForeignKey(Shop, on_delete=models.CASCADE)
     unit = models.DecimalField(max_digits=6, decimal_places=2, default=0)  # Decimal
     number_of_units = models.IntegerField(
         default=0, validators=[MaxValueValidator(1000), MinValueValidator(0)]
@@ -46,7 +44,10 @@ class Product(models.Model):
 
     @property
     def price_for_kilo(self):
-        return self.price_for_unit / self.unit
+        try:
+            return round(self.price_for_unit / self.unit, 2)
+        except ZeroDivisionError:
+            return 0
 
     class Meta:
         verbose_name = "Product"

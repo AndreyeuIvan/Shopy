@@ -15,6 +15,10 @@ urlpatterns = [
     path("", include(router.urls)),
     # path('api-auth/', include('rest_framework.urls')),
     path("basket/", views.BasketView.as_view()),
+    path(
+        "basket/<int:pk>/", views.BasketDeleteView.as_view()
+    ),  # basket_view переопределить Названия урлов
     path("buy/", views.BuyGenericAPIView.as_view()),
     path("clear/", views.ClearGenericAPIView.as_view()),
+    path("product_search/", views.PurchaseList.as_view()),
 ]
