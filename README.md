@@ -44,3 +44,7 @@ User пользуется фильтрами и сортировкой для д
 8. Во view c Product использовать filter по name_shop.
 9. Во view c Product использовать filter по name_product.
    Увелилить number of users.
+10. Переписать url
+11. Исправить валидаторы
+12. Переписать request
+13. Bulk_update
