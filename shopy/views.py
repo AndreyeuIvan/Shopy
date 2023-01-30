@@ -135,7 +135,9 @@ class BuyGenericAPIView(generics.GenericAPIView):
             [x.delete() for x in queryset_of_products]
             return response.Response(status=status.HTTP_204_NO_CONTENT)
         else:
-            return response.Response(account_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return response.Response(
+                account_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class ClearGenericAPIView(generics.GenericAPIView):
@@ -145,7 +147,7 @@ class ClearGenericAPIView(generics.GenericAPIView):
 
     def delete(self, request):
         """
-        User нажимает кнопку “Clear” и все его товары удаляются из 
+        User нажимает кнопку “Clear” и все его товары удаляются из
         Reserved (увеличивается number_of_units в Storage).
         """
         # import pdb;pdb.set_trace()

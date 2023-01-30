@@ -35,8 +35,10 @@ class Shop(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=250)
-    shop_name = models.ForeignKey(Shop, on_delete=models.CASCADE)  # Foreigne key with Model Shop
-    unit = models.DecimalField(max_digits=6, decimal_places=2, default=0) # Decimal
+    shop_name = models.ForeignKey(
+        Shop, on_delete=models.CASCADE
+    )  # Foreigne key with Model Shop
+    unit = models.DecimalField(max_digits=6, decimal_places=2, default=0)  # Decimal
     number_of_units = models.IntegerField(
         default=0, validators=[MaxValueValidator(1000), MinValueValidator(0)]
     )
@@ -44,7 +46,7 @@ class Product(models.Model):
 
     @property
     def price_for_kilo(self):
-        return self.price_for_unit/self.unit
+        return self.price_for_unit / self.unit
 
     class Meta:
         verbose_name = "Product"
@@ -64,7 +66,10 @@ class Reserved(models.Model):
     )
 
     class Meta:
-        unique_together = ('user', 'product',)
+        unique_together = (
+            "user",
+            "product",
+        )
         verbose_name = "Reserved"
         verbose_name_plural = "Reserveds"
 
@@ -73,4 +78,4 @@ class Reserved(models.Model):
 
     @property
     def total_price(self):
-        return self.number_of_units*self.product.price_for_unit
+        return self.number_of_units * self.product.price_for_unit

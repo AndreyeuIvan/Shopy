@@ -26,14 +26,14 @@ class ReserverSerializer(serializers.ModelSerializer):
     def validate(self, value_data):
         validated_data = super().validate(value_data)
         print(self.context, "validate")
-        #import pdb;pdb.set_trace()
+        # import pdb;pdb.set_trace()
         return validated_data
         raise serializers.ValidationError("ARRR")
 
     def validate_number_of_units(self, data):
         required_qty = self.initial_data["number_of_units"]
         try:
-            if self.context['own_stock'] < required_qty:
+            if self.context["own_stock"] < required_qty:
                 raise serializers.ValidationError("ARRR")
         except Exception:
             raise serializers.ValidationError("Except")
@@ -72,12 +72,12 @@ class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         fields = ("user", "amount")
-        
+
     def validate(self, data):
         print(data)
-        #import pdb;pdb.set_trace()
-        user_amount = Account.objects.get(user=self.context['user']).amount
-        if user_amount < self.context['sum_reserved']:
-            raise serializers.ValidationError('Fullfill your account')
+        # import pdb;pdb.set_trace()
+        user_amount = Account.objects.get(user=self.context["user"]).amount
+        if user_amount < self.context["sum_reserved"]:
+            raise serializers.ValidationError("Fullfill your account")
         validated_data = super().validate(data)
         return validated_data
