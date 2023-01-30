@@ -6,9 +6,7 @@ from rest_framework import views
 from rest_framework.response import Response
 from rest_framework.request import Request
 
-from my_auth.serializers import (
-    LoginSerializer, UserSerializer, UserRegisterSerializer
-)
+from my_auth.serializers import LoginSerializer, UserSerializer, UserRegisterSerializer
 from my_auth.models import User
 
 
@@ -18,18 +16,13 @@ class LoginView(views.APIView):
     def post(self, request: Request, *args, **kwargs) -> Response:
 
         serializer = LoginSerializer(
-            data=self.request.data,
-            context={'request': self.request}
+            data=self.request.data, context={"request": self.request}
         )
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
+        user = serializer.validated_data["user"]
         login(request, user)
         return Response(
-            {
-                'id': user.id,
-                'username': user.username
-            },
-            status=status.HTTP_202_ACCEPTED
+            {"id": user.id, "username": user.username}, status=status.HTTP_202_ACCEPTED
         )
 
 

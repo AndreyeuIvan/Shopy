@@ -12,7 +12,7 @@ User one-to-many Reserved
 Функционал
 
 User видит только свои товары. +
-User выбирает товар, number_of_units, нажимает кнопку “Add” и его товары добавляется в Reserved (уменьшается number_of_units в Storage).
+User выбирает товар, number_of_units, нажимает кнопку “Add” и его товары добавляется в Reserved (уменьшается number_of_units в Product).+
 User выбирает товар, number_of_units, нажимает кнопку “Remove” и его товары удаляются из Reserved (увеличивается number_of_units в Storage).
 User выбирает товар и нажимает кнопку “Delete” и все его товары одного вида удаляются из Reserved (увеличивается number_of_units в Storage).
 
