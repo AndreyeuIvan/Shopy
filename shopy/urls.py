@@ -1,4 +1,4 @@
-from django.urls import include, path
+from django.urls import include, path, re_path
 from rest_framework import routers
 
 from shopy import views
@@ -20,5 +20,5 @@ urlpatterns = [
     ),  # basket_view переопределить Названия урлов
     path("buy/", views.BuyGenericAPIView.as_view()),
     path("clear/", views.ClearGenericAPIView.as_view()),
-    path("product_search/", views.PurchaseList.as_view()),
+    re_path(r"^product_search/$", views.PurchaseListAPIView.as_view(), name='filter'),
 ]

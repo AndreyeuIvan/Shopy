@@ -70,7 +70,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ("id", "name", "reserve", "price_for_kilo")
+        fields = ("id", "name", "reserve", "price_for_kilo", "price_for_unit")
         optional_fields = ("reserve",)
 
 

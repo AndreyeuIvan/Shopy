@@ -1,3 +1,11 @@
-from django.test import TestCase
+from rest_framework.test import APITestCase
 
-# Create your tests here.
+from django.urls import reverse
+from django.contrib.auth.models import User
+
+
+class PurchaseListAPIViewTestCase(APITestCase):
+    url = reverse()
+    def setUp(self):
+        self.name = "Potato"
+        self.shop_name = "I_LOVE_YOU"
