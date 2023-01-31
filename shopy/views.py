@@ -196,7 +196,6 @@ class ClearGenericAPIView(generics.GenericAPIView):
 
 
 class PurchaseList(generics.ListAPIView):
-    serializer_class = ProductSerializer
     """
     User пользуется фильтрами и сортировкой для добавления продуктов
     Добавить фильтрацию товаров по названию магазина.
@@ -204,11 +203,12 @@ class PurchaseList(generics.ListAPIView):
     Добавить сортировку по price_for_unit.
     Добавить сортировку по price_for_kg.
     """
+    serializer_class = ProductSerializer
     queryset = Product.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, CustomeOrderingFilter]
     filterset_fields = ["shop_name__name", "name"]
-    ordering_fields = ["price_for_unit", "name"]
+    ordering_fields = ["price_for_unit", "price_for_kilo"]
     """
     def get_queryset(self):
         #import pdb;pdb.set_trace()
@@ -217,5 +217,4 @@ class PurchaseList(generics.ListAPIView):
         if product_required is not None:
             queryset = queryset.filter(name=product_required)
         return queryset
-
     """
