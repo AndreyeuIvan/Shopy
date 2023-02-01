@@ -19,6 +19,6 @@ urlpatterns = [
         "basket/<int:pk>/", views.BasketDeleteView.as_view()
     ),  # basket_view переопределить Названия урлов
     path("buy/", views.BuyGenericAPIView.as_view()),
-    path("clear/", views.ClearGenericAPIView.as_view()),
-    re_path(r"^product_search/$", views.PurchaseListAPIView.as_view(), name='search'),
+    path("clear/", views.ClearGenericAPIView.as_view(), name='clear'),
+    re_path(r"^product/search/?$", views.PurchaseListAPIView.as_view(), name='search'),
 ]

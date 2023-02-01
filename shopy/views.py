@@ -137,6 +137,13 @@ class BasketDeleteView(BasketView, mixins.RetrieveModelMixin):
 
 
 class BuyGenericAPIView(generics.GenericAPIView):
+    """Userviewset
+    Restful Structure:
+        | URL style      | HTTP Method | URL Nanme   | Action Function |
+        |----------------|-------------|-------------|-----------------|
+        | /users         | GET, POST   | user-list   | user_list       |
+        | /users/<email> | GET, DELETE | user-detail | user_detail     |
+    """
     queryset = Reserved.objects.all()
     serializer_class = ReserverSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -181,11 +188,16 @@ class ClearGenericAPIView(generics.GenericAPIView):
 
     def delete(self, request):
         """
+        ClearGenericAPIView
+        Restful Structure:
+        | URL style          | HTTP Method | URL Nanme   | Action Function |
+        |------------------- |-------------|-------------|-----------------|
+        | api/clear/         | DELETE      | clear       | reserved_delete |
         User нажимает кнопку “Clear” и все его товары удаляются из
         Reserved (увеличивается number_of_units в Storage).
         Bulk_update(number_of_units)
         """
-        # import pdb;pdb.set_trace()
+        import pdb;pdb.set_trace()
         list_of_products_reversed = Reserved.objects.filter(user=request.user.id)
         for reservation in list_of_products_reversed:
             product = reservation.product
@@ -197,6 +209,12 @@ class ClearGenericAPIView(generics.GenericAPIView):
 
 class PurchaseListAPIView(generics.ListAPIView):
     """
+    PurchaseListAPIView
+    Restful Structure:
+        | URL style          | HTTP Method | URL Nanme   | Action Function |
+        |------------------- |-------------|-------------|-----------------|
+        | api/product/search | GET         | search      | product_list    |
+
     User пользуется фильтрами и сортировкой для добавления продуктов
     Добавить фильтрацию товаров по названию магазина.
     Добавить фильтрацию товаров по названию товара.

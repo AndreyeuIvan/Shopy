@@ -15,6 +15,11 @@ class Account(models.Model):
     )
 
     class Meta:
+        unique_together = (
+            "user",
+            "amount",
+        )
+
         verbose_name = "Account"
         verbose_name_plural = "Accounts"
 
