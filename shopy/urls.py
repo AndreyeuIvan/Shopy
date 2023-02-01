@@ -20,5 +20,5 @@ urlpatterns = [
     ),  # basket_view переопределить Названия урлов
     path("buy/", views.BuyGenericAPIView.as_view()),
     path("clear/", views.ClearGenericAPIView.as_view()),
-    re_path(r"^product_search/$", views.PurchaseListAPIView.as_view(), name='filter'),
+    re_path(r"^product_search/$", views.PurchaseListAPIView.as_view(), name='search'),
 ]
