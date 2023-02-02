@@ -6,7 +6,7 @@ from phone_field import PhoneField
 
 
 class User(AbstractUser):
-    email = models.EmailField("email address", unique=True)
+    email = models.EmailField("email address", null=True)
     first_name = models.CharField("first name", max_length=30, blank=True)
     last_name = models.CharField("last name", max_length=30, blank=True)
     is_active = models.BooleanField("active", default=True)
