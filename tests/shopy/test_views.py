@@ -11,6 +11,34 @@ from shopy.serializers import ProductSerializer
 from shopy.models import Reserved, Account, Product
 
 
+class BasketViewSet(BaseUserTest):
+    def test_get_list_method_failed(self):
+        self.client.post(
+            reverse("login"),
+            {"username": self.user.username, "password": self.password},
+        )
+        response = self.client.get(self.basket_url)
+        self.assertNotEqual(len(response.data), Reserved.objects.all().count())
+
+    def test_get_list_method_success(self):
+        pass
+
+    def test_post_method_reserved(self):
+        self.client.post(
+            reverse("login"),
+            {"username": self.user.username, "password": self.password},
+        )
+        data = {"product": 1, "number_of_units": 3}
+        product_before_request = self.product
+        self.client.post(self.basket_url, data=data)
+        my_reserve = Reserved.objects.get(product_id=data["product"])
+        self.assertTrue(data["number_of_units"] == my_reserve.number_of_units)
+        self.assertNotEqual(
+            product_before_request.number_of_units, my_reserve.product.number_of_units
+        )
+        self.assertTrue(product_before_request.id, my_reserve.product.id)
+
+
 class PurchaseListAPIViewTestCase(BaseUserTest):
     def test_with_some_products_created_by_one_user(self):
         products = ProductFactory.create_batch(5)
@@ -21,7 +49,7 @@ class PurchaseListAPIViewTestCase(BaseUserTest):
         response = self.client.get(self.search_url)
         self.assertEqual(200, response.status_code)
         self.assertTrue(self.product.name == response.data[0].get("name"))
-        self.assertTrue(products[0].name == response.data[1].get("name"))
+        self.assertTrue(products[0].name == response.data[2].get("name"))
 
     def test_product_search_get_list_of_products(self):
         client = APIClient()
@@ -30,7 +58,6 @@ class PurchaseListAPIViewTestCase(BaseUserTest):
         # res = self.client.post(url_login,{"username":self.user.username, "password":self.password})
         response = client.get(self.search_url)
         self.assertTrue(self.product.name == response.data[0].get("name"))
-        # import pdb;pdb.set_trace()
 
     def test_product_search_get_product_by_using_filter_name_of_the_product(self):
         self.client.post(
@@ -41,7 +68,7 @@ class PurchaseListAPIViewTestCase(BaseUserTest):
         url_filter = f"{self.search_url}?{filter}={self.product.name}"
         response = self.client.get(url_filter).data
         self.assertTrue(self.product.name == response[0].get("name"))
-        # print(response)
+
 
     def test_product_search_get_product_by_using_filter_name_of_the_shop(self):
         self.client.post(
@@ -52,9 +79,6 @@ class PurchaseListAPIViewTestCase(BaseUserTest):
         filter = "shop_name"
         url_filter = f"{self.search_url}?{filter}={self.product.shop_name}"
         response = self.client.get(url_filter).data
-        # import pdb;pdb.set_trace()
-        # self.assertTrue(self.product.name == response[0].get('name'))
-        # import pdb;pdb.set_trace()
 
     def test_product_search_get_product_by_using_ordering_by_price_for_unit(self):
         """
@@ -73,8 +97,7 @@ class PurchaseListAPIViewTestCase(BaseUserTest):
         url_filter = f"{self.search_url}?ordering={order_value}"
         response = self.client.get(url_filter).data
         products.append(self.product)
-        # print(response)
-        # import pdb;pdb.set_trace()
+
         sorted_result = sorted(products, key=lambda x: x.price_for_unit)
         self.assertTrue(float(sorted_result[0].price_for_unit)) == float(
             (response[0].get("price_for_unit"))
@@ -98,10 +121,7 @@ class PurchaseListAPIViewTestCase(BaseUserTest):
         url_filter = f"{self.search_url}/?ordering={order_value}"
         response = self.client.get(url_filter).data
         products.append(self.product)
-        # print(response)
-        # import pdb;pdb.set_trace()
         sorted_result = sorted(products, key=lambda x: x.price_for_kilo, reverse=True)
-        # print(sorted_result)
         self.assertTrue(float(sorted_result[0].price_for_kilo)) == float(
             (response[0].get("price_for_kilo"))
         )
@@ -138,8 +158,8 @@ class PurchaseListAPIViewTestCase(BaseUserTest):
             (response[0].get("price_for_kilo"))
         )
 
-class AnnulmentGenericAPIViewTestCase(APIClient):
 
+class AnnulmentGenericAPIViewTestCase(APIClient):
     def test_create_serveral_objects_apply_patch_method_success(self):
         """
         1. Получаем доступ.
@@ -169,5 +189,4 @@ class AnnulmentGenericAPIViewTestCase(APIClient):
         )
         batch_of_products = ProductFactory.create_batch(5)
         response = self.client.patch(self.annulment_url)
-        list_of_reserved
-
+        

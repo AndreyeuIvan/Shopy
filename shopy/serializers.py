@@ -26,22 +26,18 @@ class ReserverSerializer(serializers.ModelSerializer):
     def validate(self, value_data):
         validated_data = super().validate(value_data)
         print(self.context, "validate")
-        # import pdb;pdb.set_trace()
         return validated_data
 
     def validate_number_of_units(self, data):
-        required_qty = self.initial_data["number_of_units"]
-        try:
-            if self.context["own_stock"] < required_qty:
-                raise serializers.ValidationError("ARRR")
-        except Exception:
-            raise serializers.ValidationError("Except")
+        required_qty = int(self.initial_data["number_of_units"])
+        if self.context["own_stock"] < required_qty:
+            raise serializers.ValidationError("ARRR")
         validated_data = super().validate(data)
         return validated_data
 
     class Meta:
         model = Reserved
-        fields = ("number_of_units", "product")
+        fields = ("id", "number_of_units", "product")
 
 
 class ProductSerializer(serializers.ModelSerializer):
