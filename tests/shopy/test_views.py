@@ -8,6 +8,7 @@ from tests.shopy.factories import ProductFactory
 from tests.my_auth.factories import UserFactory
 from tests.shopy.base import BaseUserTest
 from shopy.serializers import ProductSerializer
+from shopy.models import Reserved, Account, Product
 
 
 class PurchaseListAPIViewTestCase(BaseUserTest):
@@ -137,4 +138,36 @@ class PurchaseListAPIViewTestCase(BaseUserTest):
             (response[0].get("price_for_kilo"))
         )
 
-class 
+class AnnulmentGenericAPIViewTestCase(APIClient):
+
+    def test_create_serveral_objects_apply_patch_method_success(self):
+        """
+        1. Получаем доступ.
+        2. Создаем несколько объектов.
+        3. Нажимаем Buy(patch)
+        4. Проверяем аккаунт
+        5. Проверяем количество резерва
+        """
+        self.client.post(
+            reverse("login"),
+            {"username": self.user.username, "password": self.password},
+        )
+        batch_of_products = ProductFactory.create_batch(5)
+        response = self.client.patch(self.annulment_url)
+
+    def test_create_serveral_objects_apply_patch_method_success(self):
+        """
+        1. Получаем доступ.
+        2. Создаем несколько объектов.
+        3. Нажимаем Clear(delete)
+        4. Проверяем аккаунт
+        5. Проверяем количество резерва
+        """
+        self.client.post(
+            reverse("login"),
+            {"username": self.user.username, "password": self.password},
+        )
+        batch_of_products = ProductFactory.create_batch(5)
+        response = self.client.patch(self.annulment_url)
+        list_of_reserved
+

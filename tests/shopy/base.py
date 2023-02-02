@@ -17,5 +17,6 @@ class BaseUserTest(APITestCase):
         cls.other_user.set_password(cls.password)
         cls.other_user.save(update_fields=("password",))
         cls.search_url = reverse_lazy("search")
+        cls.annulment_url = reverse_lazy("annulment")
         cls.shop = ShopFactory()
         cls.product = ProductFactory(name="Milk", shop_name=cls.shop)
