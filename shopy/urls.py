@@ -12,5 +12,5 @@ router.register(r"basket", views.BasketViewSet, basename="basket")
 urlpatterns = [
     path("", include(router.urls)),
     path("annulment/", views.AnnulmentGenericAPIView.as_view(), name="annulment"),
-    re_path(r"^product/search/?$", views.PurchaseListAPIView.as_view(), name="search"),
+    re_path(r"^products/search/?$", views.PurchaseListAPIView.as_view(), name="search"),
 ]
