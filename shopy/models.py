@@ -5,7 +5,7 @@ from my_auth.models import User
 
 
 class Account(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)  # add unique field
     amount = models.DecimalField(
         max_digits=6,
         decimal_places=2,

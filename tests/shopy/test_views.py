@@ -287,6 +287,7 @@ class BasketViewSetTestCase(BaseUserTest):
             reverse("login"),
             {"username": self.user.username, "password": self.password},
         )
+        breakpoint()
         new_url = self.basket_url + str(self.product.id) + "/"
         response = self.client.delete(new_url)
         self.assertEqual(

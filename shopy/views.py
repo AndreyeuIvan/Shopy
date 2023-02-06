@@ -1,7 +1,5 @@
 from django.shortcuts import get_object_or_404
-
 from django_filters.rest_framework import DjangoFilterBackend
-
 
 from rest_framework import generics, permissions, viewsets, status, response, generics
 
@@ -200,7 +198,6 @@ class PurchaseListAPIView(generics.ListAPIView):
         | URL style          | HTTP Method | URL Name    | Action Function |
         |------------------- |-------------|-------------|-----------------|
         | api/product/search | GET         | search      | product_list    |
-
     User пользуется фильтрами и сортировкой для добавления продуктов
     Добавить фильтрацию товаров по названию магазина.
     Добавить фильтрацию товаров по названию товара.
