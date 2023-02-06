@@ -75,7 +75,6 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = ("user", "amount")
 
     def validate(self, data):
-        # user_amount = Account.objects.get(user=self.context["user"]).amount filter
         if data["amount"] < self.context["sum_reserved"]:
             raise serializers.ValidationError("Fullfill your account")
         validated_data = super().validate(data)
