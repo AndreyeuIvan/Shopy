@@ -10,7 +10,7 @@ class Account(models.Model):
     amount = models.DecimalField(
         max_digits=6,
         decimal_places=2,
-        default=1,
+        default=500,
         validators=[MaxValueValidator(1000), MinValueValidator(1)],
     )
 

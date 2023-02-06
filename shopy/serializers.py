@@ -23,26 +23,20 @@ class ReserverSerializer(serializers.ModelSerializer):
         slug_field='id'
     )"""
 
-    def validate(self, value_data):
-        validated_data = super().validate(value_data)
-        print(self.context, "validate")
-        return validated_data
-
     def validate_number_of_units(self, data):
-        required_qty = int(self.initial_data["number_of_units"])
-        if self.context["own_stock"] < required_qty:
-            raise serializers.ValidationError("ARRR")
+        if self.context.get("request") == "post" and self.context.get("own_stock") < data:
+            raise serializers.ValidationError("Please increase you stock value")
         validated_data = super().validate(data)
         return validated_data
 
     class Meta:
         model = Reserved
         fields = ("id", "number_of_units", "product")
+        optional_fields = ("number_of_units",)
 
 
 class ProductSerializer(serializers.ModelSerializer):
     reserve = ReserverSerializer(many=True, required=False)
-    # import pdb;pdb.set_trace()
     price_for_kilo = serializers.ReadOnlyField()
     """
     def validate(self, own_stock, required_qty):
@@ -78,10 +72,8 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = ("user", "amount")
 
     def validate(self, data):
-        print(data)
-        # import pdb;pdb.set_trace()
         # user_amount = Account.objects.get(user=self.context["user"]).amount filter
-        if self.context["account_amount"] < self.context["sum_reserved"]:
+        if data["amount"] < self.context["sum_reserved"]:
             raise serializers.ValidationError("Fullfill your account")
         validated_data = super().validate(data)
         return validated_data

@@ -2,8 +2,7 @@ from rest_framework.test import APITestCase
 from rest_framework.reverse import reverse_lazy
 
 from tests.my_auth.factories import UserFactory
-from tests.shopy.factories import ProductFactory, ShopFactory, ReservedFactory
-
+from tests.shopy.factories import ProductFactory, ShopFactory, ReservedFactory, AccountFactory
 
 class BaseUserTest(APITestCase):
     @classmethod
@@ -23,4 +22,5 @@ class BaseUserTest(APITestCase):
         cls.product = ProductFactory(
             name="Milk", shop_name=cls.shop, number_of_units=15
         )
-        cls.reserve = ReservedFactory()
+        cls.reserve = ReservedFactory(user=cls.user)
+        cls.account = AccountFactory(user=cls.user)

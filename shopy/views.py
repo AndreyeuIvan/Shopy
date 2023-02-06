@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework import generics
 
 from shopy.serializers import ReserverSerializer, AccountSerializer, ProductSerializer
-from shopy.models import Reserved, Product
+from shopy.models import Reserved, Product, Account
 
 
 class BasketViewSet(viewsets.ReadOnlyModelViewSet):
@@ -19,8 +19,10 @@ class BasketViewSet(viewsets.ReadOnlyModelViewSet):
     Restful Structure:
         | URL style      | HTTP Method | URL Name   | Action Function |
         |----------------|-------------|------------|-----------------|
-        |                | GET,PATCH   |            | reserved_list   |
-        | api/basket/    | PUT, DELETE | basket     | reserved_delete |
+        | api/basket/    | GET,        | basket     | reserved_list   |
+        | api/basket/    | PATCH,      | basket     | reserved_patch  |
+        | api/basket/    | PUT,        | basket     | reserved_put    |
+        | api/basket/    | DELETE,     | basket     | reserved_delete |                
     """
 
     permission_classes = [permissions.IsAuthenticated]
@@ -48,14 +50,17 @@ class BasketViewSet(viewsets.ReadOnlyModelViewSet):
         own_stock = Product.objects.get(id=request.data["product"])
         required_qty = int(request.data["number_of_units"])
         serializer = ReserverSerializer(
-            data=request.data, context={"own_stock": own_stock.number_of_units}
+            data=request.data, context={
+                "own_stock": own_stock.number_of_units,
+                "request": "post"
+                }
         )
         if serializer.is_valid():
             own_stock.number_of_units -= required_qty
             own_stock.save(update_fields=["number_of_units"])
             serializer.save(user_id=request.user.id)
             return response.Response(
-                f"{serializer.data['number_of_units']} have been added to product_id {serializer.data['product']}",
+                f"{serializer.data['number_of_units']} items have been added to product_id {serializer.data['product']}",
                 status=status.HTTP_201_CREATED,
             )
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -68,11 +73,11 @@ class BasketViewSet(viewsets.ReadOnlyModelViewSet):
         Количество товаров соотвественно юзеру
         """
         own_stock = Reserved.objects.get(
-            user=request.user, product=request.data["product"]
+            user=request.user, product=int(request.data["product"])
         )
         required_qty = int(request.data["number_of_units"])
         serializer = ReserverSerializer(
-            data=request.data, context={"own_stock": own_stock.number_of_units}
+            data=request.data, context={"own_stock": own_stock.product.number_of_units}
         )
         if serializer.is_valid():
             product_pk = request.data["product"]
@@ -89,6 +94,7 @@ class BasketViewSet(viewsets.ReadOnlyModelViewSet):
             own_stock.save(update_fields=["number_of_units"])
             # print(own_stock.number_of_units)
             return response.Response(serializer.data, status=status.HTTP_200_OK)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
         """
@@ -100,10 +106,11 @@ class BasketViewSet(viewsets.ReadOnlyModelViewSet):
         list_to_bulk = []
         serializer = ReserverSerializer(data=request.data)
         if serializer.is_valid():
-            # product_pk = kwargs["pk"]
+            product_pk = kwargs["pk"]
             all_reserved_goods = Reserved.objects.filter(
-                user_id=request.user.id
-            )  # , product=product_p
+                user_id=request.user.id,
+                product=product_pk
+            )
             if len(all_reserved_goods) == 0:
                 return response.Response(
                     "Fullfill your basket", status=status.HTTP_400_BAD_REQUEST
@@ -126,7 +133,7 @@ class AnnulmentGenericAPIView(generics.GenericAPIView):
     Restful Structure:
         | URL style      | HTTP Method | URL Name   | Action Function |
         |----------------|-------------|------------|-----------------|
-        |                | PATCH       |            | user_list       |
+        |                | PATCH       |            | reserved_patch  |
         | api/annulment/ | DELETE      | annulment  | reserved_delete |
     """
 
@@ -136,11 +143,14 @@ class AnnulmentGenericAPIView(generics.GenericAPIView):
 
     def patch(self, request):
         """
-        User нажимает кнопку “Buy” и все его товары удаляются из Reserved и списываются деньги с Account.
-        Как только создается юзер- создавать аккаунт
+        User нажимает кнопку “Buy” и все его товары удаляются из Reserved
+        и списываются деньги с Account.
+        {"username":"Vadim",
+        "password":"123qwer123"}
         """
         queryset_of_products = Reserved.objects.filter(user=request.user.id)
         sum_reserved = sum([x.total_price for x in queryset_of_products])
+        new_account, created = Account.objects.get_or_create(user=request.user)
         account_serializer = AccountSerializer(
             data=request.data,
             context={
@@ -154,7 +164,9 @@ class AnnulmentGenericAPIView(generics.GenericAPIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
         elif account_serializer.is_valid():
-            [x.delete() for x in queryset_of_products]
+            queryset_of_products._raw_delete(queryset_of_products.db)
+            new_account.amount -= sum_reserved
+            new_account.save(update_fields=['amount'])
             return response.Response(
                 "You reserved items in a basket has been deleted.",
                 status=status.HTTP_204_NO_CONTENT,
