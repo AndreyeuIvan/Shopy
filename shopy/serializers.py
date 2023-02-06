@@ -24,7 +24,10 @@ class ReserverSerializer(serializers.ModelSerializer):
     )"""
 
     def validate_number_of_units(self, data):
-        if self.context.get("request") == "post" and self.context.get("own_stock") < data:
+        if (
+            self.context.get("request") == "post"
+            and self.context.get("own_stock") < data
+        ):
             raise serializers.ValidationError("Please increase you stock value")
         validated_data = super().validate(data)
         return validated_data

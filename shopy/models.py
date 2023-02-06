@@ -1,12 +1,13 @@
 from django.db import models
-from django.urls import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 from my_auth.models import User
 
 
 class Account(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, null=True, blank=True
+    )
     amount = models.DecimalField(
         max_digits=6,
         decimal_places=2,
@@ -41,11 +42,13 @@ class Shop(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=250)
     shop_name = models.ForeignKey(Shop, on_delete=models.CASCADE)
-    unit = models.DecimalField(max_digits=6, decimal_places=2, default=0)  # Decimal
+    unit = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     number_of_units = models.IntegerField(
         default=0, validators=[MaxValueValidator(1000), MinValueValidator(0)]
     )
-    price_for_unit = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    price_for_unit = models.DecimalField(
+        max_digits=6, decimal_places=2, default=0
+    )
 
     @property
     def price_for_kilo(self):
@@ -63,7 +66,9 @@ class Product(models.Model):
 
 
 class Reserved(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=True
+    )
     product = models.ForeignKey(
         "Product", on_delete=models.CASCADE, null=True, blank=True
     )

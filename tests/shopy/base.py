@@ -2,7 +2,13 @@ from rest_framework.test import APITestCase
 from rest_framework.reverse import reverse_lazy
 
 from tests.my_auth.factories import UserFactory
-from tests.shopy.factories import ProductFactory, ShopFactory, ReservedFactory, AccountFactory
+from tests.shopy.factories import (
+    ProductFactory,
+    ShopFactory,
+    ReservedFactory,
+    AccountFactory,
+)
+
 
 class BaseUserTest(APITestCase):
     @classmethod
@@ -12,8 +18,8 @@ class BaseUserTest(APITestCase):
         cls.user.set_password(cls.password)
         cls.user.save(update_fields=("password",))
         cls.other_user = UserFactory()
-        # cls.password = UserFactory().password
-        cls.other_user.set_password(cls.password)
+        cls.password_other_user = UserFactory().password
+        cls.other_user.set_password(cls.password_other_user)
         cls.other_user.save(update_fields=("password",))
         cls.search_url = reverse_lazy("search")
         cls.annulment_url = reverse_lazy("annulment")
