@@ -37,11 +37,9 @@ class CustomeOrderingFilter(filters.OrderingFilter):
             else:
                 mid = len(ordering) // 2
                 my_first_sort = self.custome_sorting(queryset, ordering=ordering[:mid])
-                print(my_first_sort, ordering[:mid])
                 my_second_sort = self.custome_sorting(
                     my_first_sort, ordering=ordering[mid:]
                 )
-                print(my_second_sort, ordering[mid:])
                 return my_second_sort
         else:
             return queryset

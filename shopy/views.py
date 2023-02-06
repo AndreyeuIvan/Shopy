@@ -1,17 +1,13 @@
-
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from shopy._custome_order import CustomeOrderingFilter
-from rest_framework import permissions
-from rest_framework import viewsets
-from rest_framework import response
-from rest_framework import status
-from rest_framework import generics
+
+from rest_framework import generics, permissions, viewsets, status, response, generics
 
 from shopy.serializers import ReserverSerializer, AccountSerializer, ProductSerializer
 from shopy.models import Reserved, Product, Account
+from shopy._custome_order import CustomeOrderingFilter
 
 
 class BasketViewSet(viewsets.ReadOnlyModelViewSet):
@@ -22,7 +18,7 @@ class BasketViewSet(viewsets.ReadOnlyModelViewSet):
         | api/basket/    | GET,        | basket     | reserved_list   |
         | api/basket/    | PATCH,      | basket     | reserved_patch  |
         | api/basket/    | PUT,        | basket     | reserved_put    |
-        | api/basket/    | DELETE,     | basket     | reserved_delete |                
+        | api/basket/    | DELETE,     | basket     | reserved_delete |
     """
 
     permission_classes = [permissions.IsAuthenticated]
@@ -45,22 +41,25 @@ class BasketViewSet(viewsets.ReadOnlyModelViewSet):
             "number_of_units":1
         }
         User выбирает товар, number_of_units, нажимает кнопку “Add”
-        и его товары добавляется в Reserved (уменьшается number_of_units в Product).+
+        и его товары добавляется в Reserved
+        (уменьшается number_of_units в Product).
         """
         own_stock = Product.objects.get(id=request.data["product"])
         required_qty = int(request.data["number_of_units"])
         serializer = ReserverSerializer(
-            data=request.data, context={
-                "own_stock": own_stock.number_of_units,
-                "request": "post"
-                }
+            data=request.data,
+            context={"own_stock": own_stock.number_of_units, "request": "post"},
         )
         if serializer.is_valid():
             own_stock.number_of_units -= required_qty
             own_stock.save(update_fields=["number_of_units"])
             serializer.save(user_id=request.user.id)
             return response.Response(
-                f"{serializer.data['number_of_units']} items have been added to product_id {serializer.data['product']}",
+                f"""{
+                    serializer.data['number_of_units']}
+                    items have been added to product_id
+                    {serializer.data['product']
+                }""",
                 status=status.HTTP_201_CREATED,
             )
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -83,16 +82,12 @@ class BasketViewSet(viewsets.ReadOnlyModelViewSet):
             product_pk = request.data["product"]
             qty_add_to_product = int(request.data["number_of_units"])
             product_to_increment_qty = get_object_or_404(Product, pk=product_pk)
-            # print(product_to_increment_qty.number_of_units)
             product_to_increment_qty.number_of_units = (
                 product_to_increment_qty.number_of_units + qty_add_to_product
             )
             product_to_increment_qty.save(update_fields=["number_of_units"])
-            # print(product_to_increment_qty.number_of_units)
-            # print(own_stock.number_of_units)
             own_stock.number_of_units -= required_qty
             own_stock.save(update_fields=["number_of_units"])
-            # print(own_stock.number_of_units)
             return response.Response(serializer.data, status=status.HTTP_200_OK)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -108,19 +103,16 @@ class BasketViewSet(viewsets.ReadOnlyModelViewSet):
         if serializer.is_valid():
             product_pk = kwargs["pk"]
             all_reserved_goods = Reserved.objects.filter(
-                user_id=request.user.id,
-                product=product_pk
+                user=request.user, product=product_pk
             )
             if len(all_reserved_goods) == 0:
                 return response.Response(
                     "Fullfill your basket", status=status.HTTP_400_BAD_REQUEST
                 )
             for product in all_reserved_goods:
-                product_to_increment_qty = get_object_or_404(
-                    Product, pk=product.product.id
-                )
-                product_to_increment_qty.number_of_units += product.number_of_units
-                list_to_bulk.append(product_to_increment_qty)
+                product_changed_qty = get_object_or_404(Product, pk=product.product.id)
+                product_changed_qty.number_of_units += product.number_of_units
+                list_to_bulk.append(product_changed_qty)
             Product.objects.bulk_update(list_to_bulk, ["number_of_units"])
             all_reserved_goods._raw_delete(all_reserved_goods.db)
         return response.Response(
@@ -166,7 +158,7 @@ class AnnulmentGenericAPIView(generics.GenericAPIView):
         elif account_serializer.is_valid():
             queryset_of_products._raw_delete(queryset_of_products.db)
             new_account.amount -= sum_reserved
-            new_account.save(update_fields=['amount'])
+            new_account.save(update_fields=["amount"])
             return response.Response(
                 "You reserved items in a basket has been deleted.",
                 status=status.HTTP_204_NO_CONTENT,
@@ -183,16 +175,22 @@ class AnnulmentGenericAPIView(generics.GenericAPIView):
         """
         list_to_bulk = []
         list_of_products_reserved = Reserved.objects.filter(user=request.user.id)
-        for reservation in list_of_products_reserved:
-            product = reservation.product
-            product.number_of_units += reservation.number_of_units
-            list_to_bulk.append(product)
-        Product.objects.bulk_update(list_to_bulk, ["number_of_units"])
-        list_of_products_reserved._raw_delete(list_of_products_reserved.db)
-        return response.Response(
-            "Reserved products, has been deleted.",
-            status=status.HTTP_204_NO_CONTENT
-        )
+        if len(list_of_products_reserved) == 0:
+            return response.Response(
+                "There is no Reserved products.",
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        else:
+            for reservation in list_of_products_reserved:
+                product = reservation.product
+                product.number_of_units += reservation.number_of_units
+                list_to_bulk.append(product)
+            Product.objects.bulk_update(list_to_bulk, ["number_of_units"])
+            list_of_products_reserved._raw_delete(list_of_products_reserved.db)
+            return response.Response(
+                "Reserved products, has been deleted.",
+                status=status.HTTP_204_NO_CONTENT,
+            )
 
 
 class PurchaseListAPIView(generics.ListAPIView):

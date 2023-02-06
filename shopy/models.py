@@ -1,5 +1,4 @@
 from django.db import models
-from django.urls import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 from my_auth.models import User
@@ -41,7 +40,7 @@ class Shop(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=250)
     shop_name = models.ForeignKey(Shop, on_delete=models.CASCADE)
-    unit = models.DecimalField(max_digits=6, decimal_places=2, default=0)  # Decimal
+    unit = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     number_of_units = models.IntegerField(
         default=0, validators=[MaxValueValidator(1000), MinValueValidator(0)]
     )

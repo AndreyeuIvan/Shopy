@@ -24,7 +24,10 @@ class ReserverSerializer(serializers.ModelSerializer):
     )"""
 
     def validate_number_of_units(self, data):
-        if self.context.get("request") == "post" and self.context.get("own_stock") < data:
+        if (
+            self.context.get("request") == "post"
+            and self.context.get("own_stock") < data
+        ):
             raise serializers.ValidationError("Please increase you stock value")
         validated_data = super().validate(data)
         return validated_data
@@ -72,7 +75,6 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = ("user", "amount")
 
     def validate(self, data):
-        # user_amount = Account.objects.get(user=self.context["user"]).amount filter
         if data["amount"] < self.context["sum_reserved"]:
             raise serializers.ValidationError("Fullfill your account")
         validated_data = super().validate(data)
