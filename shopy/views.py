@@ -106,10 +106,11 @@ class BasketViewSet(viewsets.ReadOnlyModelViewSet):
         list_to_bulk = []
         serializer = ReserverSerializer(data=request.data)
         if serializer.is_valid():
-            # product_pk = kwargs["pk"]
+            product_pk = kwargs["pk"]
             all_reserved_goods = Reserved.objects.filter(
-                user_id=request.user.id
-            )  # , product=product_p
+                user_id=request.user.id,
+                product=product_pk
+            )
             if len(all_reserved_goods) == 0:
                 return response.Response(
                     "Fullfill your basket", status=status.HTTP_400_BAD_REQUEST
@@ -147,7 +148,6 @@ class AnnulmentGenericAPIView(generics.GenericAPIView):
         {"username":"Vadim",
         "password":"123qwer123"}
         """
-        #breakpoint()
         queryset_of_products = Reserved.objects.filter(user=request.user.id)
         sum_reserved = sum([x.total_price for x in queryset_of_products])
         new_account, created = Account.objects.get_or_create(user=request.user)

@@ -2,7 +2,6 @@ from decimal import Decimal
 
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APIClient
 
 from tests.shopy.factories import ProductFactory, ReservedFactory
 from tests.shopy.base import BaseUserTest
@@ -261,7 +260,15 @@ class BasketViewSetTestCase(BaseUserTest):
             reverse("login"),
             {"username": self.user.username, "password": self.password},
         )
-        data = {"product": 3, "number_of_units": 1}
+        user_product_id = self.reserve.product.id
+        new_url = self.basket_url + str(user_product_id) + '/'
+        response = self.client.delete(new_url)
+        breakpoint()
+        self.assertEqual(
+            response.data,
+            "Balance has been restored",
+        )
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
 
     def test_delete_method_auth_failed(self):
         pass
@@ -339,15 +346,23 @@ class PurchaseListAPIViewTestCase(BaseUserTest):
         response = self.client.get(self.search_url)
         self.assertEqual(200, response.status_code)
         self.assertTrue(self.product.name == response.data[0].get("name"))
+        self.assertTrue(self.product.id == response.data[0].get("id"))
+        self.assertTrue(self.product.price_for_kilo == float(response.data[0].get("price_for_kilo")))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
         self.assertTrue(products[0].name == response.data[2].get("name"))
+        self.assertTrue(products[0].id == response.data[2].get("id"))
+        self.assertTrue(products[0].price_for_kilo == float(response.data[2].get("price_for_kilo")))
 
     def test_product_search_get_list_of_products(self):
-        client = APIClient()
-        client.login(username=self.user.username, password=self.password)
-        # url_login = reverse('login')
-        # res = self.client.post(url_login,{"username":self.user.username, "password":self.password})
-        response = client.get(self.search_url)
+        self.client.post(
+            reverse("login"),
+            {"username": self.user.username, "password": self.password},
+        )
+        response = self.client.get(self.search_url)
         self.assertTrue(self.product.name == response.data[0].get("name"))
+        self.assertTrue(self.product.id == response.data[0].get("id"))
+        self.assertTrue(self.product.price_for_kilo == float(response.data[0].get("price_for_kilo")))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
 
     def test_product_search_get_product_by_using_filter_name_of_the_product(self):
         self.client.post(
@@ -356,8 +371,10 @@ class PurchaseListAPIViewTestCase(BaseUserTest):
         )
         filter = "name"
         url_filter = f"{self.search_url}?{filter}={self.product.name}"
-        response = self.client.get(url_filter).data
-        self.assertTrue(self.product.name == response[0].get("name"))
+        response = self.client.get(url_filter)
+        self.assertTrue(self.product.name == response.data[0].get("name"))
+        self.assertTrue(self.product.id == response.data[0].get("id"))
+        self.assertTrue(self.product.price_for_kilo == float(response.data[0].get("price_for_kilo")))
 
     def test_product_search_get_product_by_using_filter_name_of_the_shop(self):
         self.client.post(
@@ -367,7 +384,11 @@ class PurchaseListAPIViewTestCase(BaseUserTest):
         products = ProductFactory.create_batch(5)
         filter = "shop_name"
         url_filter = f"{self.search_url}?{filter}={self.product.shop_name}"
-        response = self.client.get(url_filter).data
+        response = self.client.get(url_filter)
+        self.assertTrue(self.product.name == response.data[0].get("name"))
+        self.assertTrue(self.product.id == response.data[0].get("id"))
+        self.assertTrue(self.product.price_for_kilo == float(response.data[0].get("price_for_kilo")))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
 
     def test_product_search_get_product_by_using_ordering_by_price_for_unit(self):
         """
@@ -386,11 +407,13 @@ class PurchaseListAPIViewTestCase(BaseUserTest):
         url_filter = f"{self.search_url}?ordering={order_value}"
         response = self.client.get(url_filter).data
         products.append(self.product)
-
         sorted_result = sorted(products, key=lambda x: x.price_for_unit)
         self.assertTrue(float(sorted_result[0].price_for_unit)) == float(
             (response[0].get("price_for_unit"))
         )
+        self.assertTrue(sorted_result[0].name == response[0].get("name"))
+        self.assertTrue(sorted_result[0].id == response[0].get("id"))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
 
     def test_product_search_get_product_by_using_ordering_by_price_for_kilo(self):
         """
@@ -414,6 +437,9 @@ class PurchaseListAPIViewTestCase(BaseUserTest):
         self.assertTrue(float(sorted_result[0].price_for_kilo)) == float(
             (response[0].get("price_for_kilo"))
         )
+        self.assertTrue(sorted_result[0].name == response[0].get("name"))
+        self.assertTrue(sorted_result[0].id == response[0].get("id"))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
 
     def test_product_search_get_product_by_using_ordering_by_price_for_kilo_and_price_for_unit(
         self,
@@ -446,3 +472,4 @@ class PurchaseListAPIViewTestCase(BaseUserTest):
             float(sorted_result_second_time[0].price_for_kilo),
             float(response[0].get("price_for_kilo")),
         )
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
