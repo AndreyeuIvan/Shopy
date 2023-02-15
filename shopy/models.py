@@ -1,70 +1,14 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+from products.models import Product
 from my_auth.models import User
 
 
-class Account(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)  # add unique field
-    amount = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        default=500,
-        validators=[MaxValueValidator(1000), MinValueValidator(1)],
-    )
-
-    class Meta:
-        unique_together = (
-            "user",
-            "amount",
-        )
-
-        verbose_name = "Account"
-        verbose_name_plural = "Accounts"
-
-    def __str__(self):
-        return self.user.username
-
-
-class Shop(models.Model):
-    name = models.CharField(max_length=250)
-
-    class Meta:
-        verbose_name = "Shop"
-        verbose_name_plural = "Shops"
-
-    def __str__(self):
-        return self.name
-
-
-class Product(models.Model):
-    name = models.CharField(max_length=250)
-    shop_name = models.ForeignKey(Shop, on_delete=models.CASCADE)
-    unit = models.DecimalField(max_digits=6, decimal_places=2, default=0)
-    number_of_units = models.IntegerField(
-        default=0, validators=[MaxValueValidator(1000), MinValueValidator(0)]
-    )
-    price_for_unit = models.DecimalField(max_digits=6, decimal_places=2, default=0)
-
-    @property
-    def price_for_kilo(self):
-        try:
-            return round(self.price_for_unit / self.unit, 2)
-        except ZeroDivisionError:
-            return 0
-
-    class Meta:
-        verbose_name = "Product"
-        verbose_name_plural = "Products"
-
-    def __str__(self):
-        return self.name
-
-
 class Reserved(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(
-        "Product", on_delete=models.CASCADE, null=True, blank=True
+        Product, on_delete=models.CASCADE, null=True, blank=True
     )
     number_of_units = models.IntegerField(
         default=0, validators=[MaxValueValidator(1000), MinValueValidator(0)]

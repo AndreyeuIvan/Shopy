@@ -5,4 +5,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("shopy.urls")),
     path("api/", include("my_auth.urls")),
+    path("search/", include("products.urls")),
 ]

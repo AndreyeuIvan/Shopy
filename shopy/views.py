@@ -1,11 +1,13 @@
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import generics, permissions, viewsets, status, response, generics
+from rest_framework import generics, permissions, viewsets, status, response
 
-from shopy.serializers import ReserverSerializer, AccountSerializer, ProductSerializer
-from shopy.models import Reserved, Product, Account
-from shopy._custome_order import CustomeOrderingFilter
+from shopy.serializers import ReserverSerializer
+from my_auth.serializers import AccountSerializer
+from shopy.models import Reserved
+from products.models import Product
+from my_auth.models import Account
+
 
 
 class BasketViewSet(viewsets.ReadOnlyModelViewSet):
@@ -189,31 +191,3 @@ class AnnulmentGenericAPIView(generics.GenericAPIView):
                 "Reserved products, has been deleted.",
                 status=status.HTTP_204_NO_CONTENT,
             )
-
-
-class PurchaseListAPIView(generics.ListAPIView):
-    """
-    PurchaseListAPIView
-    Restful Structure:
-        | URL style          | HTTP Method | URL Name    | Action Function |
-        |------------------- |-------------|-------------|-----------------|
-        | api/product/search | GET         | search      | product_list    |
-    User пользуется фильтрами и сортировкой для добавления продуктов
-    Добавить фильтрацию товаров по названию магазина.
-    Добавить фильтрацию товаров по названию товара.
-    Добавить сортировку по price_for_unit.
-    Добавить сортировку по price_for_kg.
-    """
-
-    serializer_class = ProductSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, CustomeOrderingFilter]
-    filterset_fields = ["shop_name__name", "name"]
-    ordering_fields = ["price_for_unit", "price_for_kilo"]
-
-    def get_queryset(self):
-        queryset = Product.objects.all()
-        product_required = self.request.query_params.get("product")
-        if product_required is not None:
-            queryset = queryset.filter(name=product_required)
-        return queryset

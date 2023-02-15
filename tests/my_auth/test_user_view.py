@@ -1,7 +1,7 @@
 from rest_framework import status
 from django.urls import reverse
 
-from my_auth.models import User
+from Shopy.my_auth.models import User
 from tests.my_auth.base import BaseUserTest
 
 

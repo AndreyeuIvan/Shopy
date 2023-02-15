@@ -1,41 +1,8 @@
 from rest_framework import serializers
-from shopy.models import Reserved
+
 from products.models import Product
-
-"""
-class ReserverSerializer(serializers.ModelSerializer):
-    product = serializers.HyperlinkedIdentityField(
-        view_name='product-detail'
-    )
-    product = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='name'
-    )
-    class Meta:
-        model = Reserved
-        fields = ('user', 'number_of_units', 'product')
-"""
-
-
-class ReserverSerializer(serializers.ModelSerializer):
-    """
-    product = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='id'
-    )"""
-
-    def validate_number_of_units(self, data):
-        if (
-            self.context.get("request") == "post"
-            and self.context.get("own_stock") < data
-        ):
-            raise serializers.ValidationError("Please increase you stock value")
-        return super().validate(data)
-
-    class Meta:
-        model = Reserved
-        fields = ("id", "number_of_units", "product")
-        optional_fields = ("number_of_units",)
+from shopy.models import Reserved
+from shopy.serializers import ReserverSerializer
 
 
 class ProductSerializer(serializers.ModelSerializer):

@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "my_auth",
     "shopy",
+    "products",
     "phone_field",
     "rest_framework",
     "rest_framework.authtoken",

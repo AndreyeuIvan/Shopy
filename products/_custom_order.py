@@ -5,7 +5,6 @@ from django.db.models.query import QuerySet
 
 class CustomeOrderingFilter(filters.OrderingFilter):
     def remove_invalid_fields(self, queryset, fields, view, request):
-
         valid_fields = [
             item[0]
             for item in self.get_valid_fields(queryset, view, {"request": request})

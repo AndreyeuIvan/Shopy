@@ -4,7 +4,7 @@ from django.contrib.auth import password_validation
 
 from rest_framework import serializers
 
-from my_auth.models import User
+from my_auth.models import User, Account
 
 
 class LoginSerializer(serializers.Serializer):
@@ -79,3 +79,16 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         )
         login(request, user)
         return user
+
+
+class AccountSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source="user.username")
+
+    class Meta:
+        model = Account
+        fields = ("user", "amount")
+
+    def validate(self, data):
+        if data["amount"] < self.context["sum_reserved"]:
+            raise serializers.ValidationError("Fullfill your account")
+        return super().validate(data)

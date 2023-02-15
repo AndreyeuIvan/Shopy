@@ -48,3 +48,57 @@ User пользуется фильтрами и сортировкой для д
 11. Исправить валидаторы
 12. Переписать request
 13. Bulk_update
+
+TO-DO list:
+
+1. Лучше разбивать на отдельные приложения. Тогда у тебя будет все в разных приложения/аппках.
+
+shops
+products
+DONE!
+
+Account объединить с Users
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+2. Можно сделать поле не чувствительным к регистру и уникальным. Но для этого нужно установить в psql CREATE EXTENSION citext;
+
+from django.contrib.postgres.fields import CICharField
+
+class Shop(models.Model):
+name = CICharField(max_length=128, unique=True) # name = models.CharField(max_length=250)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+3. В Reserved модели product user лучше все же не делать их null
+
+class Reserved(models.Model):
+user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+product = models.ForeignKey(
+"Product", on_delete=models.CASCADE, null=True, blank=True
+)
+number_of_units = models.IntegerField(
+default=0, validators=[MaxValueValidator(1000), MinValueValidator(0)]
+)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Мне удалось создать через API Product без User
+
+4. Избегай многострочных комментов кода с """ """. Их не так просто разкомментить.
+
+5. Лучше сразу return. Такие паттерны хорошо отслеживает Sourcery
+   return super().validate(data)
+
+6. BasketViewSet(viewsets.ReadOnlyModelViewSet)
+   Это сбивает с толку потому что ты потом снова определяешь методы post put и т.д.
+
+7. Мне удалось через API вернуть больше товаров чем есть.
+
+8. Я сделал покупку и у меня прибавилось денег. Ups!
+
+P.S.
+
+Надо лучше проработаь ModelViewSet и как они работают в связке с Serilizers and Models.
+
+- CustomeOrderingFilter посмотри как у меня сделан https://github.com/veledzimovich-iTechArt/shop/blob/master/backend/units/filters.py
+
+- Лучше исправлять опечатки
+  def custome_sorting(self, queryset, ordering)
